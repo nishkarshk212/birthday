@@ -415,7 +415,9 @@
         }
 
         .message-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://i.ibb.co/bDTVr7D/Gemini-Generated-Image-ib7l4eib7l4eib7l-3.jpg');
+            background-size: cover;
+            background-position: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: clamp(20px, 5vw, 50px);
             border-radius: 30px;
@@ -444,8 +446,8 @@
         }
 
         .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            display: flex;
+            justify-content: center;
             gap: 30px;
             max-width: 1200px;
             margin: 0 auto;
@@ -453,7 +455,9 @@
 
         .memory-card {
             position: relative;
-            height: 400px;
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
             border-radius: 20px;
             overflow: hidden;
             background: var(--glass);
