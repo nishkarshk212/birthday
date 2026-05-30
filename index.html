@@ -125,6 +125,84 @@
             }
         }
 
+        /* --- Countdown Page --- */
+        #countdown-page {
+            background: linear-gradient(-45deg, #0a0a0b, #1a0a0c, #2a0a0e, #050505);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .countdown-container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            padding: 50px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .countdown-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #fff, var(--gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .timer {
+            display: flex;
+            justify-content: center;
+            gap: clamp(10px, 3vw, 30px);
+            margin-bottom: 40px;
+        }
+
+        .timer-segment {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .timer-value {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .timer-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+
+        /* Sparkle/Star effect for countdown */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            animation: starFloat var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes starFloat {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+
         /* --- Hero Page --- */
         #hero-page {
             background: radial-gradient(circle at center, #1a0a0c 0%, #050505 100%);
@@ -556,8 +634,41 @@
 
 <body>
 
+    <!-- COUNTDOWN SECTION -->
+    <section id="countdown-page" class="page active">
+        <div id="countdown-stars" style="position: absolute; width: 100%; height: 100%; top:0; left:0; pointer-events: none;"></div>
+        <div class="countdown-container">
+            <h1 class="countdown-title">The Big Day is Approaching...</h1>
+            <div class="timer">
+                <div class="timer-segment">
+                    <div id="days" class="timer-value">00</div>
+                    <div class="timer-label">Days</div>
+                </div>
+                <div class="timer-segment">
+                    <div id="hours" class="timer-value">00</div>
+                    <div class="timer-label">Hours</div>
+                </div>
+                <div class="timer-segment">
+                    <div id="minutes" class="timer-value">00</div>
+                    <div class="timer-label">Minutes</div>
+                </div>
+                <div class="timer-segment">
+                    <div id="seconds" class="timer-value">00</div>
+                    <div class="timer-label">Seconds</div>
+                </div>
+            </div>
+            <p id="countdown-note" style="color: rgba(255,255,255,0.7); margin-bottom: 30px; font-style: italic;">
+                Counting down to June 4th, 2026
+            </p>
+            <button id="enter-btn" class="btn-neon" style="display: none;" onclick="transitionTo('hero-page')">Enter The Celebration</button>
+            <div style="margin-top: 20px;">
+                <button class="btn-neon" style="padding: 10px 25px; font-size: 0.8rem; animation: none;" onclick="toggleMusic()">🎵 Toggle Music</button>
+            </div>
+        </div>
+    </section>
+
     <!-- HERO SECTION -->
-    <section id="hero-page" class="page active">
+    <section id="hero-page" class="page">
         <div id="particle-container"
             style="position: absolute; width: 100%; height: 100%; top:0; left:0; pointer-events: none;"></div>
         <h1 class="hero-title">Happy Birthday, <span class="recipient-name">Minitaa</span></h1>
@@ -658,7 +769,8 @@
         // --- Easy Customization ---
         const CONFIG = {
             recipientName: "Minitaa", // Change this to the name of your special person
-            audioUrl: "https://www.image2url.com/r2/default/audio/1780113936404-24e2e46d-b403-4f24-b218-f45201f7acec.mp3"
+            audioUrl: "https://www.image2url.com/r2/default/audio/1780113936404-24e2e46d-b403-4f24-b218-f45201f7acec.mp3",
+            birthdayDate: "June 4, 2026 00:00:00"
         };
 
         // Apply configuration
@@ -666,7 +778,70 @@
             document.querySelectorAll('.recipient-name').forEach(el => el.innerText = CONFIG.recipientName);
             const audioSource = document.querySelector('#birthday-audio source');
             if (audioSource) audioSource.src = CONFIG.audioUrl;
+            startCountdown();
+            createStars();
         });
+
+        // --- Countdown Logic ---
+        function startCountdown() {
+            const target = new Date(CONFIG.birthdayDate).getTime();
+            const enterBtn = document.getElementById('enter-btn');
+            const note = document.getElementById('countdown-note');
+
+            const timer = setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+
+                if (diff <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('days').innerText = "00";
+                    document.getElementById('hours').innerText = "00";
+                    document.getElementById('minutes').innerText = "00";
+                    document.getElementById('seconds').innerText = "00";
+                    enterBtn.style.display = "inline-block";
+                    note.innerText = "It's finally here! ❤️";
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('days').innerText = days.toString().padStart(2, '0');
+                document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+                
+                // For testing/preview purposes, always show enter button if you want to bypass
+                enterBtn.style.display = "inline-block"; 
+            }, 1000);
+        }
+
+        function createStars() {
+            const container = document.getElementById('countdown-stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                star.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('birthday-audio');
+            if (audio.paused) {
+                audio.play().catch(() => {
+                    alert("Please click anywhere on the page first to enable audio!");
+                });
+            } else {
+                audio.pause();
+            }
+        }
 
         // --- Navigation Logic ---
         function transitionTo(pageId) {
