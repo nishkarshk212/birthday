@@ -161,30 +161,65 @@
         .timer {
             display: flex;
             justify-content: center;
-            gap: clamp(10px, 3vw, 30px);
+            gap: clamp(15px, 4vw, 40px);
             margin-bottom: 40px;
+            flex-wrap: wrap;
         }
 
         .timer-segment {
             display: flex;
             flex-direction: column;
             align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 20px;
+            min-width: clamp(80px, 15vw, 120px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .timer-segment:hover {
+            transform: translateY(-10px) scale(1.05);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--accent);
+            box-shadow: 0 15px 40px var(--accent-glow);
+        }
+
+        .timer-segment::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, transparent, transparent, var(--accent));
+            animation: rotateGlow 4s linear infinite;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes rotateGlow {
+            100% { transform: rotate(360deg); }
         }
 
         .timer-value {
-            font-size: clamp(2rem, 6vw, 4rem);
-            font-weight: 700;
-            color: var(--accent);
-            text-shadow: 0 0 20px var(--accent-glow);
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
             font-family: 'Montserrat', sans-serif;
+            margin-bottom: 5px;
         }
 
         .timer-label {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 5px;
+            letter-spacing: 3px;
+            color: var(--accent);
+            font-weight: 600;
         }
 
         /* Sparkle/Star effect for countdown */
