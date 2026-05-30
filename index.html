@@ -657,9 +657,6 @@
                     <div class="timer-label">Seconds</div>
                 </div>
             </div>
-            <p id="countdown-note" style="color: rgba(255,255,255,0.7); margin-bottom: 30px; font-style: italic;">
-                Counting down to June 4th, 2026
-            </p>
             <button id="enter-btn" class="btn-neon" style="display: none;" onclick="transitionTo('hero-page')">Enter The Celebration</button>
             <div style="margin-top: 20px;">
                 <button class="btn-neon" style="padding: 10px 25px; font-size: 0.8rem; animation: none;" onclick="toggleMusic()">🎵 Toggle Music</button>
@@ -786,7 +783,6 @@
         function startCountdown() {
             const target = new Date(CONFIG.birthdayDate).getTime();
             const enterBtn = document.getElementById('enter-btn');
-            const note = document.getElementById('countdown-note');
 
             const timer = setInterval(() => {
                 const now = new Date().getTime();
@@ -799,7 +795,6 @@
                     document.getElementById('minutes').innerText = "00";
                     document.getElementById('seconds').innerText = "00";
                     enterBtn.style.display = "inline-block";
-                    note.innerText = "It's finally here! ❤️";
                     return;
                 }
 
