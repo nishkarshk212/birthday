@@ -851,7 +851,7 @@
         </div>
     </section>
 
-    <audio id="birthday-audio" loop>
+    <audio id="birthday-audio" loop autoplay playsinline>
         <source src="https://www.image2url.com/r2/default/audio/1780113936404-24e2e46d-b403-4f24-b218-f45201f7acec.mp3" type="audio/mpeg">
     </audio>
 
@@ -871,16 +871,40 @@
             startCountdown();
             createStars();
 
-            // Attempt autoplay on first user interaction with the page
-            const startAudio = () => {
-                const audio = document.getElementById('birthday-audio');
+            const audio = document.getElementById('birthday-audio');
+            
+            // Try to play immediately on load
+            const attemptPlay = () => {
                 audio.play().then(() => {
-                    document.removeEventListener('click', startAudio);
-                    document.removeEventListener('touchstart', startAudio);
-                }).catch(() => { });
+                    console.log("Autoplay started!");
+                    removeListeners();
+                }).catch(() => {
+                    console.log("Autoplay waiting for interaction...");
+                });
             };
-            document.addEventListener('click', startAudio);
-            document.addEventListener('touchstart', startAudio);
+
+            const removeListeners = () => {
+                document.removeEventListener('click', attemptPlay);
+                document.removeEventListener('touchstart', attemptPlay);
+                document.removeEventListener('scroll', attemptPlay);
+                document.removeEventListener('mousemove', attemptPlay);
+            };
+
+            // Listen for any form of interaction as fallback
+            document.addEventListener('click', attemptPlay);
+            document.addEventListener('touchstart', attemptPlay);
+            document.addEventListener('scroll', attemptPlay);
+            document.addEventListener('mousemove', attemptPlay);
+
+            // Also try playing every second until it works (for some browsers)
+            const autoRetry = setInterval(() => {
+                audio.play().then(() => {
+                    clearInterval(autoRetry);
+                    removeListeners();
+                }).catch(() => {});
+            }, 1000);
+
+            attemptPlay();
         });
 
         // --- Countdown Logic ---
