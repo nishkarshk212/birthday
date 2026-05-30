@@ -655,13 +655,74 @@
             }
         }
 
-        @media (max-width: 600px) {
-            .gallery-grid {
-                grid-template-columns: 1fr;
+        @media (max-width: 768px) {
+            .countdown-container {
+                padding: 30px 20px;
+            }
+
+            .timer {
+                gap: 10px;
+            }
+
+            .timer-segment {
+                min-width: 70px;
+                padding: 15px 10px;
+            }
+
+            .timer-value {
+                font-size: 1.8rem;
+            }
+
+            .timer-label {
+                font-size: 0.6rem;
+                letter-spacing: 1px;
+            }
+
+            .hero-title {
+                font-size: clamp(2rem, 10vw, 3.5rem);
+            }
+
+            .slider-card {
+                padding: 40px 20px;
+            }
+
+            .step-text {
+                font-size: 1.5rem;
+            }
+
+            .message-card {
+                padding: 30px 20px;
             }
 
             .memory-card {
-                height: 350px;
+                height: 300px;
+            }
+
+            .gallery-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn-neon {
+                padding: 15px 30px;
+                font-size: 0.9rem;
+            }
+
+            .fairy-lights-container {
+                height: 100px;
+            }
+
+            .gallery-title {
+                margin-bottom: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timer-segment {
+                min-width: 65px;
+            }
+            
+            .timer-value {
+                font-size: 1.5rem;
             }
         }
     </style>
