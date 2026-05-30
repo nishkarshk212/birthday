@@ -658,9 +658,6 @@
                 </div>
             </div>
             <button id="enter-btn" class="btn-neon" style="display: none;" onclick="transitionTo('hero-page')">Enter The Celebration</button>
-            <div style="margin-top: 20px;">
-                <button class="btn-neon" style="padding: 10px 25px; font-size: 0.8rem; animation: none;" onclick="toggleMusic()">🎵 Toggle Music</button>
-            </div>
         </div>
     </section>
 
@@ -777,6 +774,17 @@
             if (audioSource) audioSource.src = CONFIG.audioUrl;
             startCountdown();
             createStars();
+
+            // Attempt autoplay on first user interaction with the page
+            const startAudio = () => {
+                const audio = document.getElementById('birthday-audio');
+                audio.play().then(() => {
+                    document.removeEventListener('click', startAudio);
+                    document.removeEventListener('touchstart', startAudio);
+                }).catch(() => { });
+            };
+            document.addEventListener('click', startAudio);
+            document.addEventListener('touchstart', startAudio);
         });
 
         // --- Countdown Logic ---
@@ -827,19 +835,12 @@
             }
         }
 
-        function toggleMusic() {
-            const audio = document.getElementById('birthday-audio');
-            if (audio.paused) {
-                audio.play().catch(() => {
-                    alert("Please click anywhere on the page first to enable audio!");
-                });
-            } else {
-                audio.pause();
-            }
-        }
-
         // --- Navigation Logic ---
         function transitionTo(pageId) {
+            // Ensure audio plays on navigation if not already playing
+            const audio = document.getElementById('birthday-audio');
+            audio.play().catch(() => { });
+
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             const target = document.getElementById(pageId);
             target.classList.add('active');
