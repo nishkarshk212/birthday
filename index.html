@@ -672,6 +672,7 @@
     <!-- COUNTDOWN SECTION -->
     <section id="countdown-page" class="page active">
         <div id="countdown-stars" style="position: absolute; width: 100%; height: 100%; top:0; left:0; pointer-events: none;"></div>
+        <div id="countdown-hearts" style="position: absolute; width: 100%; height: 100%; top:0; left:0; pointer-events: none;"></div>
         <div class="countdown-container">
             <h1 class="countdown-title">The Big Day is Approaching...</h1>
             <div class="timer">
@@ -908,6 +909,7 @@
 
         setInterval(() => createHeart('particle-container'), 300);
         setInterval(() => createHeart('slider-particles'), 400);
+        setInterval(() => createHeart('countdown-hearts'), 500);
 
         // --- Slider Logic ---
         function nextStep(step) {
