@@ -692,7 +692,6 @@
                     <div class="timer-label">Seconds</div>
                 </div>
             </div>
-            <button id="enter-btn" class="btn-neon" style="display: none;" onclick="transitionTo('hero-page')">Enter The Celebration</button>
         </div>
     </section>
 
@@ -825,7 +824,6 @@
         // --- Countdown Logic ---
         function startCountdown() {
             const target = new Date(CONFIG.birthdayDate).getTime();
-            const enterBtn = document.getElementById('enter-btn');
 
             const timer = setInterval(() => {
                 const now = new Date().getTime();
@@ -837,7 +835,11 @@
                     document.getElementById('hours').innerText = "00";
                     document.getElementById('minutes').innerText = "00";
                     document.getElementById('seconds').innerText = "00";
-                    enterBtn.style.display = "inline-block";
+                    
+                    // Automatically transition to the celebration
+                    setTimeout(() => {
+                        transitionTo('hero-page');
+                    }, 1000);
                     return;
                 }
 
@@ -850,9 +852,6 @@
                 document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
                 document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
                 document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
-                
-                // For testing/preview purposes, always show enter button if you want to bypass
-                enterBtn.style.display = "inline-block"; 
             }, 1000);
         }
 
