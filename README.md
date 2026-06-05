@@ -21,8 +21,10 @@ Simply append parameters to your URL:
 - `date`: Birthday date (e.g., `?date=2026-12-25`)
 - `msg`: Custom message (e.g., `?msg=Happy+Birthday+Buddy!`)
 - `audio`: URL to an MP3 file
+- `photos`: Comma-separated image URLs (e.g., `?photos=url1,url2,url3`)
+- `color`: Hex code for theme color (e.g., `?color=%2300ff00` for green)
 
-Example: `index.html?name=Riddhi&date=2026-06-05&msg=You+are+amazing!`
+Example: `index.html?name=Riddhi&date=2026-06-05&msg=You+are+amazing!&color=%23ff00ff`
 
 ### 2. Using the Personalize Tool
 1. Open the website.

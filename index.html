@@ -794,7 +794,21 @@
                 </div>
                 <div>
                     <label style="display: block; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px;">Custom Message</label>
-                    <textarea id="input-msg" rows="4" placeholder="Your special message..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: white;"></textarea>
+                    <textarea id="input-msg" rows="3" placeholder="Your special message..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: white;"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px;">Accent Color</label>
+                        <input type="color" id="input-color" style="width: 100%; height: 40px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); cursor: pointer;">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px;">Music URL (MP3)</label>
+                        <input type="text" id="input-audio" placeholder="Link to MP3" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: white;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px;">Gallery Photos (Comma separated URLs)</label>
+                    <textarea id="input-photos" rows="2" placeholder="URL1, URL2, URL3..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: white;"></textarea>
                 </div>
                 <button class="btn-neon" onclick="generateLink()" style="margin-top: 10px;">Generate Link</button>
                 <button class="btn-neon" onclick="togglePersonalizer()" style="background: transparent; border-color: white; color: white; margin-top: 5px; animation: none;">Close</button>
@@ -886,15 +900,8 @@
         </div>
 
         <h2 class="gallery-title">Moments in Time</h2>
-        <div class="gallery-grid">
-            <!-- Memory 1 -->
-            <div class="memory-card">
-                <img src="https://i.ibb.co/bDTVr7D/Gemini-Generated-Image-ib7l4eib7l4eib7l-3.jpg" alt="Memory"
-                    class="memory-image">
-                <div class="memory-hover-overlay">
-                    <p class="hover-message">You make my world beautiful ❤️</p>
-                </div>
-            </div>
+        <div id="dynamic-gallery-grid" class="gallery-grid">
+            <!-- Photos will be rendered here dynamically -->
         </div>
         <div style="text-align: center; padding: 100px 0;">
             <button class="btn-neon" onclick="location.reload()">Replay The Magic</button>
@@ -913,7 +920,9 @@
                 name: params.get('name') || "Minitaa",
                 date: params.get('date') || "June 4, 2026",
                 msg: params.get('msg') || "Today isn't just a date on the calendar; it's a celebration of the light you bring into my life. Every moment with you is like a frame from a beautiful movie, and I'm so lucky to be your better half. May this year be filled with as much magic as you give to everyone around you.",
-                audio: params.get('audio') || "https://www.image2url.com/r2/default/audio/1780113936404-24e2e46d-b403-4f24-b218-f45201f7acec.mp3"
+                audio: params.get('audio') || "https://www.image2url.com/r2/default/audio/1780113936404-24e2e46d-b403-4f24-b218-f45201f7acec.mp3",
+                photos: params.get('photos') || "https://i.ibb.co/bDTVr7D/Gemini-Generated-Image-ib7l4eib7l4eib7l-3.jpg",
+                color: params.get('color') || "#ff2d55"
             };
         };
 
@@ -924,14 +933,26 @@
             recipientName: params.name,
             audioUrl: params.audio,
             birthdayDate: params.date.includes(':') ? params.date : `${params.date} 00:00:00`,
-            customMessage: params.msg
+            customMessage: params.msg,
+            photos: params.photos.split(','),
+            accentColor: params.color
         };
 
         // Apply configuration
         document.addEventListener('DOMContentLoaded', () => {
+            // Apply theme color
+            document.documentElement.style.setProperty('--accent', CONFIG.accentColor);
+            const r = parseInt(CONFIG.accentColor.slice(1, 3), 16);
+            const g = parseInt(CONFIG.accentColor.slice(3, 5), 16);
+            const b = parseInt(CONFIG.accentColor.slice(5, 7), 16);
+            document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.5)`);
+
             document.querySelectorAll('.recipient-name').forEach(el => el.innerText = CONFIG.recipientName);
             document.getElementById('dynamic-message').innerText = CONFIG.customMessage;
             
+            // Render Dynamic Gallery
+            renderGallery();
+
             const audio = document.getElementById('birthday-audio');
             const audioSource = audio.querySelector('source');
             if (audioSource) {
@@ -1022,6 +1043,9 @@
                 document.getElementById('input-name').value = CONFIG.recipientName;
                 document.getElementById('input-date').value = new Date(CONFIG.birthdayDate).toISOString().split('T')[0];
                 document.getElementById('input-msg').value = CONFIG.customMessage;
+                document.getElementById('input-color').value = CONFIG.accentColor;
+                document.getElementById('input-audio').value = CONFIG.audioUrl;
+                document.getElementById('input-photos').value = CONFIG.photos.join(',');
             }
         }
 
@@ -1029,16 +1053,38 @@
             const name = document.getElementById('input-name').value;
             const date = document.getElementById('input-date').value;
             const msg = document.getElementById('input-msg').value;
+            const color = document.getElementById('input-color').value;
+            const audio = document.getElementById('input-audio').value;
+            const photos = document.getElementById('input-photos').value;
             
             const url = new URL(window.location.href.split('?')[0]);
             if (name) url.searchParams.set('name', name);
             if (date) url.searchParams.set('date', date);
             if (msg) url.searchParams.set('msg', msg);
+            if (color && color !== '#ff2d55') url.searchParams.set('color', color);
+            if (audio && audio !== params.audio) url.searchParams.set('audio', audio);
+            if (photos) url.searchParams.set('photos', photos);
             
             const container = document.getElementById('generated-link-container');
             const input = document.getElementById('output-link');
             input.value = url.toString();
             container.style.display = 'block';
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('dynamic-gallery-grid');
+            container.innerHTML = '';
+            CONFIG.photos.forEach(url => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.innerHTML = `
+                    <img src="${url.trim()}" alt="Memory" class="memory-image">
+                    <div class="memory-hover-overlay">
+                        <p class="hover-message">You make my world beautiful ❤️</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
         function copyLink() {
