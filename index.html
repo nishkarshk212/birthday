@@ -655,6 +655,20 @@
             }
         }
 
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .sparkle-particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparkle 1s linear forwards;
+        }
+
         @media (max-width: 768px) {
             .countdown-container {
                 padding: 30px 20px;
@@ -735,8 +749,8 @@
         <div id="countdown-stars" style="position: absolute; width: 100%; height: 100%; top:0; left:0; pointer-events: none;"></div>
         <div id="countdown-hearts" style="position: absolute; width: 100%; height: 100%; top:0; left:0; pointer-events: none;"></div>
         <div class="countdown-container">
-            <h1 class="countdown-title">The Big Day is Approaching...</h1>
-            <div class="timer">
+            <h1 id="countdown-title" class="countdown-title">The Big Day is Approaching...</h1>
+            <div id="timer-display" class="timer">
                 <div class="timer-segment">
                     <div id="days" class="timer-value">00</div>
                     <div class="timer-label">Days</div>
@@ -754,8 +768,44 @@
                     <div class="timer-label">Seconds</div>
                 </div>
             </div>
+            <div id="start-button-container" style="display: none;">
+                <button class="btn-neon" onclick="transitionTo('hero-page')">Enter The Celebration</button>
+            </div>
+        </div>
+        
+        <!-- Personalization Trigger -->
+        <div style="position: absolute; bottom: 20px; right: 20px; z-index: 100;">
+            <button class="btn-neon" style="font-size: 0.7rem; padding: 10px 20px; animation: none; opacity: 0.5;" onclick="togglePersonalizer()">Personalize This Wish</button>
         </div>
     </section>
+
+    <!-- PERSONALIZER MODAL -->
+    <div id="personalizer-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px;">
+        <div class="countdown-container" style="max-width: 500px; text-align: left;">
+            <h2 class="countdown-title" style="font-size: 1.5rem; margin-bottom: 20px;">Create Custom Wish</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px;">Recipient Name</label>
+                    <input type="text" id="input-name" placeholder="e.g. Minitaa" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: white;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px;">Birthday Date</label>
+                    <input type="date" id="input-date" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: white;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px;">Custom Message</label>
+                    <textarea id="input-msg" rows="4" placeholder="Your special message..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: white;"></textarea>
+                </div>
+                <button class="btn-neon" onclick="generateLink()" style="margin-top: 10px;">Generate Link</button>
+                <button class="btn-neon" onclick="togglePersonalizer()" style="background: transparent; border-color: white; color: white; margin-top: 5px; animation: none;">Close</button>
+                <div id="generated-link-container" style="display: none; margin-top: 15px;">
+                    <label style="display: block; font-size: 0.8rem; color: var(--gold); margin-bottom: 5px;">Share this link:</label>
+                    <input type="text" id="output-link" readonly style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--gold); background: var(--glass); color: white;">
+                    <button class="btn-neon" onclick="copyLink()" style="margin-top: 10px; font-size: 0.8rem; padding: 10px;">Copy Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- HERO SECTION -->
     <section id="hero-page" class="page">
@@ -815,7 +865,7 @@
                     <h2
                         style="font-family: 'Dancing Script'; font-size: clamp(2rem, 5vw, 3.5rem); color: var(--accent); margin-bottom: 20px;">
                         My Dearest <span class="recipient-name">Minitaa</span>,</h2>
-                    <p style="font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.8; color: rgba(255,255,255,0.8);">
+                    <p id="dynamic-message" style="font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.8; color: rgba(255,255,255,0.8);">
                         Today isn't just a date on the calendar; it's a celebration of the light you bring into my life.
                         Every moment with you is like a frame from a beautiful movie, and I'm so lucky to be your
                         better half.
@@ -856,22 +906,41 @@
     </audio>
 
     <script>
+        // --- Dynamic Parameter Handling ---
+        const getQueryParams = () => {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                name: params.get('name') || "Minitaa",
+                date: params.get('date') || "June 4, 2026",
+                msg: params.get('msg') || "Today isn't just a date on the calendar; it's a celebration of the light you bring into my life. Every moment with you is like a frame from a beautiful movie, and I'm so lucky to be your better half. May this year be filled with as much magic as you give to everyone around you.",
+                audio: params.get('audio') || "https://www.image2url.com/r2/default/audio/1780113936404-24e2e46d-b403-4f24-b218-f45201f7acec.mp3"
+            };
+        };
+
+        const params = getQueryParams();
+
         // --- Easy Customization ---
         const CONFIG = {
-            recipientName: "Minitaa", // Change this to the name of your special person
-            audioUrl: "https://www.image2url.com/r2/default/audio/1780113936404-24e2e46d-b403-4f24-b218-f45201f7acec.mp3",
-            birthdayDate: "June 4, 2026 00:00:00"
+            recipientName: params.name,
+            audioUrl: params.audio,
+            birthdayDate: params.date.includes(':') ? params.date : `${params.date} 00:00:00`,
+            customMessage: params.msg
         };
 
         // Apply configuration
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.recipient-name').forEach(el => el.innerText = CONFIG.recipientName);
-            const audioSource = document.querySelector('#birthday-audio source');
-            if (audioSource) audioSource.src = CONFIG.audioUrl;
+            document.getElementById('dynamic-message').innerText = CONFIG.customMessage;
+            
+            const audio = document.getElementById('birthday-audio');
+            const audioSource = audio.querySelector('source');
+            if (audioSource) {
+                audioSource.src = CONFIG.audioUrl;
+                audio.load();
+            }
+
             startCountdown();
             createStars();
-
-            const audio = document.getElementById('birthday-audio');
             
             // Try to play immediately on load
             const attemptPlay = () => {
@@ -910,6 +979,9 @@
         // --- Countdown Logic ---
         function startCountdown() {
             const target = new Date(CONFIG.birthdayDate).getTime();
+            const title = document.getElementById('countdown-title');
+            const timerDisplay = document.getElementById('timer-display');
+            const startBtn = document.getElementById('start-button-container');
 
             const timer = setInterval(() => {
                 const now = new Date().getTime();
@@ -917,15 +989,16 @@
 
                 if (diff <= 0) {
                     clearInterval(timer);
-                    document.getElementById('days').innerText = "00";
-                    document.getElementById('hours').innerText = "00";
-                    document.getElementById('minutes').innerText = "00";
-                    document.getElementById('seconds').innerText = "00";
+                    title.innerText = `Today is ${CONFIG.recipientName}'s Special Day!`;
+                    timerDisplay.style.display = 'none';
+                    startBtn.style.display = 'block';
                     
-                    // Automatically transition to the celebration
-                    setTimeout(() => {
-                        transitionTo('hero-page');
-                    }, 1000);
+                    // Automatically transition to the celebration if it just hit 0
+                    if (diff > -10000) { // Only auto-transition if it happened in the last 10 seconds
+                        setTimeout(() => {
+                            transitionTo('hero-page');
+                        }, 2000);
+                    }
                     return;
                 }
 
@@ -939,6 +1012,40 @@
                 document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
                 document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
             }, 1000);
+        }
+
+        // --- Personalizer Logic ---
+        function togglePersonalizer() {
+            const modal = document.getElementById('personalizer-modal');
+            modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+            if (modal.style.display === 'flex') {
+                document.getElementById('input-name').value = CONFIG.recipientName;
+                document.getElementById('input-date').value = new Date(CONFIG.birthdayDate).toISOString().split('T')[0];
+                document.getElementById('input-msg').value = CONFIG.customMessage;
+            }
+        }
+
+        function generateLink() {
+            const name = document.getElementById('input-name').value;
+            const date = document.getElementById('input-date').value;
+            const msg = document.getElementById('input-msg').value;
+            
+            const url = new URL(window.location.href.split('?')[0]);
+            if (name) url.searchParams.set('name', name);
+            if (date) url.searchParams.set('date', date);
+            if (msg) url.searchParams.set('msg', msg);
+            
+            const container = document.getElementById('generated-link-container');
+            const input = document.getElementById('output-link');
+            input.value = url.toString();
+            container.style.display = 'block';
+        }
+
+        function copyLink() {
+            const input = document.getElementById('output-link');
+            input.select();
+            document.execCommand('copy');
+            alert('Link copied to clipboard!');
         }
 
         function createStars() {
